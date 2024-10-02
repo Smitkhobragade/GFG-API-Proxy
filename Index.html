@@ -79,7 +79,7 @@
     <script>
         document.getElementById('fetchData').addEventListener('click', function() {
             const skills = document.getElementById('skillsInput').value;
-            const url = `http://localhost:3000/api/search?skills=${encodeURIComponent(skills)}`;
+            const url = `https://pinto-supreme-capybara.glitch.me/api/search?skills=${encodeURIComponent(skills)}`;
             
             fetch(url)
                 .then(response => response.json())
