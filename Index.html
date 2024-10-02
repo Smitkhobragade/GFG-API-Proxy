@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .results, .job-listings {
+            margin: 5px;
+            flex: 0 0 48%; /* Occupy roughly half the width of the container */
+            padding: 15px;
+            background-color: whitesmoke;
+            border: 2px solid black;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+            overflow-x: auto; /* Allow horizontal scrolling */
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        .job-listings ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .job-listings li {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #0080ff;
+            border-radius: 5px;
+        }
+        .job-listings img {
+            max-width: 100px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Test GeeksforGeeks API</h1>
+
+    <input type="text" id="skillsInput" placeholder="Enter skills (comma separated)">
+    <button id="fetchData">Fetch Jobs</button>
+
+    <div class="container">
+        <div class="results" id="results"></div>
+        <div class="job-listings" id="jobListings"></div>
+    </div>
+
+    <script>
+        document.getElementById('fetchData').addEventListener('click', function() {
+            const skills = document.getElementById('skillsInput').value;
+            const url = `http://localhost:3000/api/search?skills=${encodeURIComponent(skills)}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = ''; // Clear previous results
+
+                    // Convert the JSON response to a formatted string
+                    const jsonResponse = JSON.stringify(data, null, 2); // 2 spaces for indentation
+                    resultsDiv.textContent = jsonResponse; // Display the JSON response
+
+                    // Clear previous job listings
+                    const jobListingsDiv = document.getElementById('jobListings');
+                    jobListingsDiv.innerHTML = '<h2>Job Listings</h2>'; // Title for job listings
+
+                    // Access job listings from data.results
+                    const jobListings = data.results || []; // Access results directly
+
+                    if (jobListings.length > 0) {
+                        const ul = document.createElement('ul');
+                        jobListings.forEach(job => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <img src="${job.organization.logo || ''}" alt="${job.organization.name || 'Company Logo'}">
+                                <strong>${job.designation.text || 'N/A'}</strong><br>
+                                <strong>Company:</strong> ${job.organization.name || 'N/A'}<br>
+                                <strong>Location:</strong> ${job.location.join(', ') || 'N/A'}<br>
+                                <strong>Experience:</strong> ${job.experience || 'N/A'}<br>
+                                <strong>Salary:</strong> ${job.salary || 'N/A'}<br>
+                                <strong>About Company:</strong> <p style="background-color: green !important;">${job.organization.about || 'N/A'}</p><br>
+                                <strong>Last Apply Date:</strong> ${new Date(job.last_apply_date).toLocaleDateString() || 'N/A'}<br>
+                                <strong>Job Posted On:</strong> ${job.job_posted_on || 'N/A'}
+                            `;
+                            ul.appendChild(li);
+                        });
+                        jobListingsDiv.appendChild(ul);
+                    } else {
+                        jobListingsDiv.innerHTML += '<p>No job listings available.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.textContent = 'Error fetching data. Please check the console for details.';
+                    document.getElementById('jobListings').innerHTML = ''; // Clear job listings on error
+                });
+        });
+    </script>
+
+</body>
+</html>
